@@ -1,9 +1,11 @@
 package com.example.restaurantreview
 
 import ReviewAdapter
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.restaurantreview.data.response.CustomerReviewsItem
+import com.example.restaurantreview.data.response.PostReviewResponse
 import com.example.restaurantreview.data.response.Restaurant
 import com.example.restaurantreview.data.response.RestaurantResponse
 import com.example.restaurantreview.data.retrofit.ApiConfig
@@ -22,12 +25,13 @@ import retrofit2.Response
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding :ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
-    companion object{
-       private const val TAG = "ActivityMain"
-      private const val RESTAURANT_ID = "uewq1zg2zlskfw1e867"
+    companion object {
+        private const val TAG = "ActivityMain"
+        private const val RESTAURANT_ID = "uewq1zg2zlskfw1e867"
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -46,9 +50,16 @@ class MainActivity : AppCompatActivity() {
         binding.rvReview.addItemDecoration(itemDecoration)
 
         findRestaurant()
+
+        //menanmbahkan reveiw dari etReview ketika btnSend di tekan
+        binding.btnSend.setOnClickListener { view ->
+            postReview(binding.etReview.text.toString())
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
     }
 
-    private fun setRestaurandData(restaurant : Restaurant) {
+    private fun setRestaurandData(restaurant: Restaurant) {
         binding.tvTitle.text = restaurant.name
         binding.tvDescription.text = restaurant.description
 
@@ -57,7 +68,8 @@ class MainActivity : AppCompatActivity() {
             .into(binding.ivPicture)
 
     }
-    private fun setReviewData(customerReviewsItem: List<CustomerReviewsItem>){
+
+    private fun setReviewData(customerReviewsItem: List<CustomerReviewsItem>) {
         val adapter = ReviewAdapter()
         adapter.submitList(customerReviewsItem)
         binding.rvReview.adapter = adapter
@@ -67,20 +79,19 @@ class MainActivity : AppCompatActivity() {
     private fun findRestaurant() {
         showLoading(true)
         val client = ApiConfig.getApiService().getRestaurant(RESTAURANT_ID)
-        client.enqueue(object : Callback<RestaurantResponse>{
+        client.enqueue(object : Callback<RestaurantResponse> {
             override fun onResponse(
                 call: Call<RestaurantResponse>,
                 response: Response<RestaurantResponse>
             ) {
                 showLoading(false)
-                if (response.isSuccessful){
+                if (response.isSuccessful) {
                     val responseBody = response.body()
-                    if (responseBody != null){
+                    if (responseBody != null) {
                         setRestaurandData(responseBody.restaurant)
                         setReviewData(responseBody.restaurant.customerReviews)
-                    }
-                    else{
-                        Log.e(TAG,"onFailure ${response.message()}")
+                    } else {
+                        Log.e(TAG, "onFailure ${response.message()}")
                     }
 
                 }
@@ -88,18 +99,43 @@ class MainActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<RestaurantResponse>, t: Throwable) {
                 showLoading(false)
-                Log.e(TAG,"onFailure: ${t.message}")
+                Log.e(TAG, "onFailure: ${t.message}")
             }
 
         })
     }
 
-    private fun showLoading(isLoading : Boolean) {
-        if (isLoading){
+    //mengrim data denagn post ke server api
+    private fun postReview(review: String) {
+        showLoading(true)
+        val client = ApiConfig.getApiService().postReview(RESTAURANT_ID, "Dicoding", review)
+        client.enqueue(object : Callback<PostReviewResponse> {
+            override fun onResponse(
+                call: Call<PostReviewResponse>,
+                response: Response<PostReviewResponse>
+            ) {
+                showLoading(false)
+                val responseBody = response.body()
+                if (response.isSuccessful && responseBody != null) {
+                    setReviewData(responseBody.customerReviews)
+                } else {
+                    Log.e(TAG, "onFailure: ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<PostReviewResponse>, t: Throwable) {
+                showLoading(false)
+                Log.e(TAG, "onFailure: ${t.message}")
+            }
+        })
+    }
+
+
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
             binding.progressBar.visibility = View.VISIBLE
-        }else{
+        } else {
             binding.progressBar.visibility = View.INVISIBLE
         }
     }
-
 }
