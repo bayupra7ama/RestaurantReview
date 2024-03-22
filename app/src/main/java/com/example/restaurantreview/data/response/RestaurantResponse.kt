@@ -8,10 +8,10 @@ data class RestaurantResponse(
 	val restaurant: Restaurant,
 
 	@field:SerializedName("error")
-	val error: Boolean,
+	val error: Boolean?,
 
 	@field:SerializedName("message")
-	val message: String
+	val message: String?
 )
 
 data class Restaurant(
