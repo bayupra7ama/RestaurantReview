@@ -17,6 +17,7 @@ import com.example.restaurantreview.data.response.CustomerReviewsItem
 import com.example.restaurantreview.data.response.Restaurant
 import com.example.restaurantreview.databinding.ActivityMainBinding
 import com.example.restaurantreview.ui.MainViewModel
+import com.google.android.material.snackbar.Snackbar
 
 
 class MainActivity : AppCompatActivity() {
@@ -54,6 +55,12 @@ class MainActivity : AppCompatActivity() {
 
         mainViewModel.isLoading.observe(this){
             showLoading(it)
+        }
+
+//        meng-observ snackBar
+        mainViewModel.snackBarText.observe(this){
+            Snackbar.make(window.decorView.rootView , it ,Snackbar.LENGTH_SHORT).show()
+
         }
 
 
