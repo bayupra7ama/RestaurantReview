@@ -57,10 +57,16 @@ class MainActivity : AppCompatActivity() {
             showLoading(it)
         }
 
-//        meng-observ snackBar
-        mainViewModel.snackBarText.observe(this){
-            Snackbar.make(window.decorView.rootView , it ,Snackbar.LENGTH_SHORT).show()
+//  /      memanfaatkan fungsi getContetHedlerd untuk mengetahui apakah fungsi pernah di gunakan atau tidak
+        mainViewModel.snackBarText.observe(this
+        ) {
+            it.getContentIfNotHandled()?.let { snacBarText ->
+                Snackbar.make(
+                    window.decorView.rootView, snacBarText,
+                    Snackbar.LENGTH_SHORT
+                ).show()
 
+            }
         }
 
 

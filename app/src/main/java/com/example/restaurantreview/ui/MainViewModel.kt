@@ -1,5 +1,6 @@
 package com.example.restaurantreview.ui
 
+import Event
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -23,8 +24,9 @@ class MainViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading : LiveData<Boolean> = _isLoading
 
-    private val _snackBarText = MutableLiveData<String>()
-    val snackBarText : LiveData<String> = _snackBarText
+//    menngunakan wraper untuk membungkus String
+    private val _snackBarText = MutableLiveData<Event<String>>()
+    val snackBarText : LiveData<Event<String>> =  _snackBarText
 
     companion object{
         private const val TAG = "MainViewModel"
@@ -77,7 +79,7 @@ class MainViewModel : ViewModel() {
                 val responseBody = response.body()
                 if (response.isSuccessful && responseBody != null) {
                     _listView.value = (responseBody.customerReviews)
-                    _snackBarText.value = response.body()?.message
+                    _snackBarText.value =Event(response.body()?.message.toString())
                 } else {
                     Log.e(TAG, "onFailure: ${response.message()}")
                 }
