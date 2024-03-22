@@ -54,4 +54,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
+
+    implementation (libs.androidx.activity.ktx)
+
+//    library android ktx activity ktx untuk inisialisasi viewModel
+
 }
